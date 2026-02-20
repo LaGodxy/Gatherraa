@@ -23,7 +23,7 @@ export class EventAnalytics {
   @Column({ type: 'simple-json', nullable: true })
   userProperties?: Record<string, any>;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   @Index()
   timestamp?: Date;
 

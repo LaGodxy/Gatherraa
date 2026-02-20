@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { EventsModule } from './events/events.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -27,6 +28,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UsersModule,
     SessionsModule,
     AnalyticsModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
