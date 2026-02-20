@@ -1,105 +1,54 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Event } from './entities/event.entity';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
-import { User, UserRole } from '../users/entities/user.entity';
+import { Injectable } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CreateEventCommand } from './commands/create-event.command';
+import { UpdateEventCommand } from './commands/update-event.command';
+import { DeleteEventCommand } from './commands/delete-event.command';
+import { BulkCreateEventsCommand } from './commands/bulk-create-events.command';
+import { CreateEventDto, UpdateEventDto, BulkCreateEventsDto } from './dto/event.dto';
 
 @Injectable()
 export class EventsService {
   constructor(
-    @InjectRepository(Event)
-    private readonly eventRepository: Repository<Event>,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
 
-  async create(createEventDto: CreateEventDto, user: User): Promise<Event> {
-    // Check if user is organizer or admin
-    if (!user.roles.includes(UserRole.ORGANIZER) && !user.roles.includes(UserRole.ADMIN)) {
-      throw new ForbiddenException('Only organizers and admins can create events');
-    }
-
-    // Check if contract address already exists
-    const existingEvent = await this.eventRepository.findOne({
-      where: { contractAddress: createEventDto.contractAddress },
-    });
-
-    if (existingEvent) {
-      throw new ForbiddenException('Event with this contract address already exists');
-    }
-
-    const event = this.eventRepository.create({
-      ...createEventDto,
-      organizerId: createEventDto.organizerId || user.id,
-      startTime: new Date(createEventDto.startTime),
-      endTime: createEventDto.endTime ? new Date(createEventDto.endTime) : null,
-    });
-
-    return await this.eventRepository.save(event);
+  async createEvent(dto: CreateEventDto, userId: string, userName?: string) {
+    return await this.commandBus.execute(
+      new CreateEventCommand(dto, userId, userName),
+    );
   }
 
-  async findAll(page: number = 1, limit: number = 20): Promise<[Event[], number]> {
-    const skip = (page - 1) * limit;
-    return await this.eventRepository.findAndCount({
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-      relations: ['organizer'],
-    });
+  async updateEvent(id: string, dto: UpdateEventDto, userId: string, userName?: string) {
+    return await this.commandBus.execute(
+      new UpdateEventCommand(id, dto, userId, userName),
+    );
   }
 
-  async findOne(id: string): Promise<Event> {
-    const event = await this.eventRepository.findOne({
-      where: { id },
-      relations: ['organizer'],
-    });
-
-    if (!event) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
-    }
-
-    return event;
+  async deleteEvent(id: string, userId: string, userName?: string) {
+    return await this.commandBus.execute(
+      new DeleteEventCommand(id, userId, userName),
+    );
   }
 
-  async findByContractAddress(contractAddress: string): Promise<Event | null> {
-    return await this.eventRepository.findOne({
-      where: { contractAddress },
-      relations: ['organizer'],
-    });
+  async bulkCreateEvents(dto: BulkCreateEventsDto, userId: string, userName?: string) {
+    return await this.commandBus.execute(
+      new BulkCreateEventsCommand(dto, userId, userName),
+    );
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto, user: User): Promise<Event> {
-    const event = await this.findOne(id);
-
-    // Check if user is organizer of this event or admin
-    if (event.organizerId !== user.id && !user.roles.includes(UserRole.ADMIN)) {
-      throw new ForbiddenException('Only the event organizer or admin can update this event');
-    }
-
-    if (updateEventDto.startTime) {
-      event.startTime = new Date(updateEventDto.startTime);
-    }
-    if (updateEventDto.endTime !== undefined) {
-      event.endTime = updateEventDto.endTime ? new Date(updateEventDto.endTime) : null;
-    }
-    if (updateEventDto.name) {
-      event.name = updateEventDto.name;
-    }
-    if (updateEventDto.description !== undefined) {
-      event.description = updateEventDto.description;
-    }
-
-    return await this.eventRepository.save(event);
+  async getEventById(id: string) {
+    // This will be implemented with query handlers
+    return { message: 'Query handler not implemented yet' };
   }
 
-  async remove(id: string, user: User): Promise<void> {
-    const event = await this.findOne(id);
+  async getEvents(query: any) {
+    // This will be implemented with query handlers
+    return { message: 'Query handler not implemented yet' };
+  }
 
-    // Only admin can delete events
-    if (!user.roles.includes(UserRole.ADMIN)) {
-      throw new ForbiddenException('Only admins can delete events');
-    }
-
-    await this.eventRepository.remove(event);
+  async getEventsByOrganizer(organizerId: string, query: any) {
+    // This will be implemented with query handlers
+    return { message: 'Query handler not implemented yet' };
   }
 }
