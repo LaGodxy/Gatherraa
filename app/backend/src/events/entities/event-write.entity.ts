@@ -37,11 +37,11 @@ export class EventWriteModel {
   @Index()
   category: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
   startDate: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
   endDate: Date;
 

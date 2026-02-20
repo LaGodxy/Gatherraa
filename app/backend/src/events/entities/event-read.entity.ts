@@ -37,11 +37,11 @@ export class EventReadModel {
   @Index()
   category: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
   startDate: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
   endDate: Date;
 
@@ -133,7 +133,7 @@ export class EventReadModel {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   @Index()
   lastActivityAt?: Date;
 }
