@@ -183,9 +183,8 @@ impl WhitelistContract {
     }
 
     fn hash_leaf(env: &Env, address: &Address, amount: i128) -> BytesN<32> {
-        let mut bytes = Bytes::new(env);
-        bytes.extend_from_array(&address.to_xdr(env).to_array());
-        bytes.extend_from_array(&amount.to_xdr(env).to_array());
+        let mut bytes = address.to_xdr(env);
+        bytes.extend(&amount.to_xdr(env));
         env.crypto().sha256(&bytes)
     }
 }

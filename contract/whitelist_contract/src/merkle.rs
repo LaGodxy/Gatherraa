@@ -10,7 +10,7 @@ pub fn verify(
 
     for node in proof.iter() {
         let mut data = [0u8; 64];
-        if computed_hash < node {
+        if computed_hash.to_array() < node.to_array() {
             data[..32].copy_from_slice(&computed_hash.to_array());
             data[32..].copy_from_slice(&node.to_array());
         } else {
